@@ -1,41 +1,43 @@
 
-<?/*php
+<?php
 session_start();
-if the form is submitted or not
+include('includes/config.php');
 
-if the form is submitted
-/*if(isset($_POST['login']))
+//if form is submitted or not
+//if the form is submitted
+if(isset($_POST['login']))
 {
-$email=$_POST['email'];
-$password=md5($_POST['password']);
-$sql ="SELECT email,Password_1 FROM tblusers WHERE email=:email and password =:Password_1";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':Password_1', $Password_1, PDO::PARAM_STR);
-$query-> execute();
-$results=$query->fetchAll(PDO::FETCH_OBJ);
-if($query->rowCount() > 0)
-{
-$_SESSION['login']=$_POST['email'];
-$_SESSION['username']=$results->username;
-$currentpage=$_SERVER['REQUEST_URI'];
-echo "<script type='text/javascript'> document.location = '$currentpage'; </script>";
-} else{
-  
-  echo "<script>alert('Invalid Details');</script>";
+  $email = mysqli_real_escape_string($db,$_POST['email']);
+  $password_1 = mysqli_real_escape_string($db,$_POST['password_1']); 
 
-}
-
-}
-*/
-?>
-
+            $sql ="SELECT email,Password_1 FROM tblusers WHERE email=:email and password =:password_1";
+               $result = mysqli_query($dbh,$sql);
+               $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+               $active = $row['active'];
+               
+               $count = mysqli_num_rows($result);
+               
+               // If result matched $email and $password_1, table row must be 1 row
+             
+               if($count == 1) {
+                  session_register("email");
+                  $_SESSION['login'] = $email;
+                  
+                  header("location: dashboard.php");
+               }else {
+                  $error = "Your Login email or Password is invalid";
+               }
+            }
+         ?>
 
 <div class="modal fade" id="loginform">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button"  class="close" data-dismiss="modal" aria-label="Close">
+        <!--close pop up-->
+        <span aria-hidden="true">&times;</span>
+        </button>
         <h3 class="modal-title">Login</h3>
       </div>
       <div class="modal-body">

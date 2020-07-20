@@ -1,103 +1,13 @@
-<?php
-// Include config file
-require_once "config.php";
- 
-// Define variables and initialize with empty values
-$username = $password_1 = $password_2 = "";
-$username_err = $password_1_err = $password_2_err = "";
- 
-// Processing form data when form is submitted
-if($_SERVER["REQUEST_METHOD"] == "POST"){
- 
-    // Validate username
-    if(empty(trim($_POST["username"]))){
-        $username_err = "Please enter a username.";
-    } else{
-        // Prepare a select statement
-        $sql = "SELECT username FROM tblusers WHERE username = ?";
-        
-        if($stmt = mysqli_prepare($link, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "s", $param_username);
-            
-            // Set parameters
-            $param_username = trim($_POST["username"]);
-            
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                /* store result */
-                mysqli_stmt_store_result($stmt);
-                
-                if(mysqli_stmt_num_rows($stmt) == 1){
-                    $username_err = "This username is already taken.";
-                } else{
-                    $username = trim($_POST["username"]);
-                }
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
-            }
 
-            // Close statement
-            mysqli_stmt_close($stmt);
-        }
-    }
-    
-    // Validate password
-    if(empty(trim($_POST["password"]))){
-        $password_1_err = "Please enter a password.";     
-    } elseif(strlen(trim($_POST["password"])) < 6){
-        $password_err = "Password must have atleast 6 characters.";
-    } else{
-        $password_1 = trim($_POST["password"]);
-    }
-    
-    // Validate confirm password
-    if(empty(trim($_POST["confirm_password"]))){
-        $password_2_err = "Please confirm password.";     
-    } else{
-        $password_2_err = trim($_POST["confirm_password"]);
-        if(empty($password_2_err && ($password_1!= $password_2))
-            $password_2_err = "Password did not match.";
-        }
-    }
-    
-    // Check input errors before inserting in database
-    if(empty($username_err) && empty($password_1_err) && empty($password_2_err)){
-        
-        // Prepare an insert statement
-        $sql = "INSERT INTO tblusers (username, password) VALUES ('$username', '$password_1', '$email')";
-         
-        if($stmt = mysqli_prepare($link, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "ss", $param_username, $param_password_1);
-            
-            // Set parameters
-            $param_username = $username;
-            $param_password_1 = password_hash($password_1, PASSWORD_DEFAULT); // Creates a password hash
-            
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                // Redirect to login page
-                header("location: login.php");
-            } else{
-                echo "Something went wrong. Please try again later.";
-            }
-
-            // Close statement
-            mysqli_stmt_close($stmt);
-        }
-    }
-    
-    // Close connection
-    mysqli_close($link);
-}
-?>
-/*session_start();
+<?php 
+session_start();
 include('includes/config.php');
 
 // initializing variables
 $username = "";
 $email    = "";
+$password_1 = $password_2 = "";
+$username_err = $password_1_err = $password_2_err = "";
 $errors = array(); 
 
 // connect to the database
@@ -139,15 +49,15 @@ if (isset($_POST['submit'])) {
   if (count($errors) == 0) {
   	$password = md5($password_1);//encrypt the password before saving in the database
 
-  	$query = "INSERT INTO tblusers (username, email, Password)
-  			  VALUES('$username', '$email', '$password')" ;
+  	$query = "INSERT INTO tblusers (username, email, password_1, password_2)
+  			  VALUES('$username', '$email', '$password' , '$password_1, '$password_2'  )" ;
   	mysqli_query($db, $query);
 	  $_SESSION['username'] = $username;
 	  $_SESSION['alogin']=$_POST['username'];
   	$_SESSION['success'] = "You are now logged in";
   	header('location: dashboard.php');
   }
-}*/
+}
 
 // ... 
 
@@ -159,13 +69,13 @@ if (isset($_POST['login'])) {
   if (empty($username)) {
     array_push($errors, "Username is required");
   }
-  if (empty($password)) {
+  if (empty($password_1)) {
     array_push($errors, "Password is required");
   }
 
   if (count($errors) == 0) {
-    $password = md5($password);
-    $query = "SELECT * FROM admin WHERE username='$username' AND password='$password'";
+    $password_1 = md5($password_1);
+    $query = "SELECT * FROM tblusers WHERE username='$username' AND password='$password'";
     $results = mysqli_query($db, $query);
     if (mysqli_num_rows($results) == 0) {
 	 //$_SESSION['username'] = $username;
